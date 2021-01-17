@@ -1,5 +1,8 @@
 import requests
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_sports(api_key, check_requests=False):
