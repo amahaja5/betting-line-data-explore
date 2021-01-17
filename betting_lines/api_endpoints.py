@@ -39,7 +39,7 @@ def get_odds(api_key, sport, region, mkt=None, date_format=None, odds_format=Non
     if sport in sports_list:
         api_params["sport"] = sport
     else:
-        raise ValueError(f"Invalid sport. Sport choices are {sport_choices}")
+        raise ValueError(f"Invalid sport. Sport choices are {sports_list}")
     region_choices = {"au", "uk", "eu", "us"}
     if region in region_choices:
         api_params["region"] = region
