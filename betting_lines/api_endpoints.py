@@ -1,11 +1,13 @@
 import requests
 import json
 import logging
+from betting_lines.api_key import get_api_key
 
 logger = logging.getLogger(__name__)
 
-
-def get_sports(api_key, check_requests=False):
+def get_sports(api_key=None, check_requests=False):
+    if not api_key:
+        api_key = get_api_key()
     sports_response = requests.get('https://api.the-odds-api.com/v3/sports', params={
         'api_key': api_key
     })
@@ -28,12 +30,16 @@ def get_sports(api_key, check_requests=False):
         )
         print(sports_json['data'][0])
         return sports_json
-    
+
 def get_set_of_sports(api_key):
+    if not api_key:
+        api_key = get_api_key()
     sports_json = get_sports(api_key)
     return [sport["key"] for sport in sports_json["data"]] + ["upcoming"]
 
-def get_odds(api_key, sport, region, mkt=None, date_format=None, odds_format=None, check_requests=False):
+def get_odds(sport, region, mkt=None, date_format=None, odds_format=None, check_requests=False, api_key=None):
+    if not api_key:
+        api_key = get_api_key()
     api_params = {"api_key" : api_key}
     sports_list = get_set_of_sports(api_key)
     if sport in sports_list:
