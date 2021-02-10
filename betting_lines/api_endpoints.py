@@ -35,6 +35,14 @@ def get_set_of_sports(api_key=None):
     sports_json = get_sports(api_key)
     return [sport["key"] for sport in sports_json["data"]] + ["upcoming"]
 
+def sport_type_to_sports(sport_type, api_key=None):
+    sports =  get_set_of_sports(api_key)
+    return list(filter(lambda x: x.startswith(sport_type), sports))
+
+def get_set_of_sports_types(api_key=None):
+    sports =  get_set_of_sports(api_key)
+    return {sport.split('_', 1)[0] for sport in sports}
+
 def get_odds(sport, region, mkt=None, date_format=None, odds_format=None, check_requests=False, api_key=None):
     if not api_key:
         api_key = get_api_key()
