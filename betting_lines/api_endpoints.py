@@ -1,8 +1,11 @@
-import requests
-import json
 import logging
+import json
+import requests
+
 from betting_lines.api_key import get_api_key
 
+REGION_CHOICES = {"au", "uk", "eu", "us"}
+MKT_CHOICES = {"h2h", "spreads", "totals", None}
 logger = logging.getLogger(__name__)
 
 def get_sports(api_key=None, check_requests=False):
@@ -11,7 +14,6 @@ def get_sports(api_key=None, check_requests=False):
     sports_response = requests.get('https://api.the-odds-api.com/v3/sports', params={
         'api_key': api_key
     })
-    
     sports_json = json.loads(sports_response.text)
 
     if not sports_json['success']:
@@ -19,14 +21,13 @@ def get_sports(api_key=None, check_requests=False):
             'There was a problem with the sports request:',
             sports_json['msg']
         )
-    else:
-        if check_requests:
-            logger.info('Remaining requests %s', sports_response.headers['x-requests-remaining'])
-            logger.info('Used requests %s', sports_response.headers['x-requests-used'])
+    if check_requests:
+        logger.info('Remaining requests %s', sports_response.headers['x-requests-remaining'])
+        logger.info('Used requests %s', sports_response.headers['x-requests-used'])
 
-        logger.info('Successfully got %s sports', len(sports_json['data']))
-        logger.info('The first sport is %s', sports_json['data'][0])
-        return sports_json
+    logger.info('Successfully got %s sports', len(sports_json['data']))
+    logger.info('The first sport is %s', sports_json['data'][0])
+    return sports_json
 
 def get_set_of_sports(api_key=None):
     if not api_key:
@@ -43,24 +44,22 @@ def get_odds(sport, region, mkt=None, date_format=None, odds_format=None, check_
         api_params["sport"] = sport
     else:
         raise ValueError(f"Invalid sport. Sport choices are {sports_list}")
-    region_choices = {"au", "uk", "eu", "us"}
-    if region in region_choices:
+    if region in REGION_CHOICES:
         api_params["region"] = region
     else:
-        raise ValueError(f"Invalid region. Region choices are {region_choices}")
-    if mkt in {"h2h", "spreads", "totals"}:
+        raise ValueError(f"Invalid region. Region choices are {REGION_CHOICES}")
+    if mkt and mkt in MKT_CHOICES:
         api_params["mkt"] = mkt
     if date_format in {"unix", "iso"}:
         api_params["dateFormat"] = date_format
     if odds_format in {"decimal", "american"}:
         api_params["oddsFormat"] = odds_format
-    
+
     odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params=api_params)
     if check_requests:
         # Check your usage
-        print()
-        print('Remaining requests', odds_response.headers['x-requests-remaining'])
-        print('Used requests', odds_response.headers['x-requests-used'])
+        logger.info('Remaining requests %s', odds_response.headers['x-requests-remaining'])
+        logger.info('Used requests %s', odds_response.headers['x-requests-used'])
 
     odds_json = json.loads(odds_response.text)
     if not odds_json['success']:
@@ -69,15 +68,10 @@ def get_odds(sport, region, mkt=None, date_format=None, odds_format=None, check_
             odds_json['msg']
         )
     else:
-        # odds_json['data'] contains a list of live and 
+        # odds_json['data'] contains a list of live and
         #   upcoming events and odds for different bookmakers.
         # Events are ordered by start time (live events are first)
-        print()
-        print(
-            'Successfully got {} events'.format(len(odds_json['data'])),
-            'Here\'s the first event:'
-        )
-        print(odds_json['data'][0])
+        logger.info('Successfully got %s events', len(odds_json['data']))
+        logger.info('Here\'s the first event %s:', odds_json['data'][0])
         return odds_json
-    
-    
+        

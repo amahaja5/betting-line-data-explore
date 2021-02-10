@@ -1,4 +1,4 @@
-import pathlib 
+import pathlib
 import appdirs
 
 default_directory = pathlib.Path(appdirs.user_config_dir('betting_lines_api')) / 'api_key'
