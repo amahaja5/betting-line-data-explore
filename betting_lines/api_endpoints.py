@@ -11,10 +11,7 @@ def get_sports(api_key=None, check_requests=False):
     sports_response = requests.get('https://api.the-odds-api.com/v3/sports', params={
         'api_key': api_key
     })
-    if check_requests:
-        print('Remaining requests', sports_response.headers['x-requests-remaining'])
-        print('Used requests', sports_response.headers['x-requests-used'])
-
+    
     sports_json = json.loads(sports_response.text)
 
     if not sports_json['success']:
@@ -23,15 +20,15 @@ def get_sports(api_key=None, check_requests=False):
             sports_json['msg']
         )
     else:
-        print()
-        print(
-            'Successfully got {} sports'.format(len(sports_json['data'])),
-            'Here\'s the first sport:'
-        )
-        print(sports_json['data'][0])
+        if check_requests:
+            logger.info('Remaining requests %s', sports_response.headers['x-requests-remaining'])
+            logger.info('Used requests %s', sports_response.headers['x-requests-used'])
+
+        logger.info('Successfully got %s sports', len(sports_json['data']))
+        logger.info('The first sport is %s', sports_json['data'][0])
         return sports_json
 
-def get_set_of_sports(api_key):
+def get_set_of_sports(api_key=None):
     if not api_key:
         api_key = get_api_key()
     sports_json = get_sports(api_key)
